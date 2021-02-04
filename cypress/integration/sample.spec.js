@@ -1,24 +1,19 @@
-import React from 'react';
-import { mount } from 'cypress-react-unit-test';
-import App from "../../App";
 /// <reference types="cypress" />
 
 import Chance from 'chance';
 const chance = new Chance();
 
-describe ('App', () => {
+describe('App', () => {
 
     const email = chance.email();
     const pass = 'ValidPassword23';
 
-    it('renders learn react link', () => {
-        mount(<App />);
+    beforeEach(() => {
+        cy.visit('http://localhost:3001');
+    })
 
-        // beforeEach(() => {
-        //     cy.visit('http://localhost:3001');
-        // })
-
-        cy.contains('Welcome to hear').should('be.visible');
+    it('has a title', () => {
+        cy.contains('Welcome to hear');
     });
 
     it('blocks protected routes', () => {
@@ -29,8 +24,8 @@ describe ('App', () => {
             .should('contain', 'You must be logged in!')
             .and('be visible')
     })
-
-    it('successfully logs in a user', () => {
+    
+    it('signs up a new user', () => {
 
         cy.contains('Login').click();
 
@@ -39,5 +34,18 @@ describe ('App', () => {
         cy.get('input[name=email]').type(email);
         cy.get('input[name=password]').type(pass);
         cy.get('button[type=submit]').click();
+
+        cy.contains('Welcome new user!');
+        cy.contains('Logout');
     });
-});
+
+    it('allows the user to create notes', () => {
+        cy.login(email, pass)
+
+        cy.get('#navToggle').click();
+        cy.contains('App').click();
+
+        const noteText = chance.sentence({words: 5});
+        const noteList = cy.get('main');
+    })
+})
